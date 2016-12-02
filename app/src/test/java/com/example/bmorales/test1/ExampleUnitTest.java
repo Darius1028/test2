@@ -1,4 +1,4 @@
-package com.example.bmorales.test;
+package com.example.bmorales.test1;
 
 import org.junit.Test;
 

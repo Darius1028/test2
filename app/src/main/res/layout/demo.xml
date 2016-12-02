@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".marco"
+    >
+
+
+    <EditText
+        android:layout_width="311dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="Name"
+        android:ems="10"
+        android:id="@+id/out" />
+
+    <Button
+        android:text="ELIMINAR DATA"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/DROP"
+        android:drawableLeft="@android:drawable/arrow_down_float"
+        android:backgroundTint="@color/colorPrimaryCustom"
+        android:onClick="buttonPressDrop"
+        android:background="@android:drawable/alert_light_frame" />
+
+    <Button
+        android:text="ENLISTAR DATOS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/GET"
+        android:drawableLeft="@android:drawable/arrow_down_float"
+        android:backgroundTint="@color/colorPrimaryCustom"
+        android:onClick="getRandom"
+        android:background="@android:drawable/alert_light_frame" />
+
+    <Button
+        android:text="OPTENER LOCALIZACIÓN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/GEO"
+        android:drawableLeft="@android:drawable/arrow_down_float"
+        android:backgroundTint="@color/colorPrimaryCustom"
+        android:background="@android:drawable/alert_light_frame"
+        android:onClick="getGeo"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        style="@style/Widget.AppCompat.Button.Small" />
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        />
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+
+        android:id="@+id/LISTA" />
+
+
+</LinearLayout>
