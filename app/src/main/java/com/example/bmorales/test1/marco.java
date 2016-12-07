@@ -133,7 +133,7 @@ public class marco extends Activity implements LoaderCallbacks<Cursor> {
                     public void onClick(DialogInterface arg0, int arg1) {
 
                         Calendar now = Calendar.getInstance();
-                        Usuario user = new Usuario(null, "Dario", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString() );
+                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString() );
                         Log.d("INFO", " " + out.saveUsuario(user) );
                     }
                 });

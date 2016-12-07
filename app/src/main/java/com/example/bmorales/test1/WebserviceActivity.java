@@ -1,62 +1,29 @@
 package com.example.bmorales.test1;
 
 
-import android.content.Context;
-import android.net.SSLCertificateSocketFactory;
-import android.os.Looper;
+
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
+import org.json.JSONArray;
+
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
+
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedKeyManager;
-import javax.net.ssl.X509TrustManager;
-
+import retrofit2.Response;
 import retrofit2.Retrofit;
-
-
-
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.Call;
+import retrofit2.Callback;
 /**
  * Created by bmorales on 11/28/2016.
  */
@@ -64,7 +31,7 @@ import retrofit2.Retrofit;
 //identify
 public class WebserviceActivity {
 
-    private String urlServ = "neurona-turk128.c9.io";
+    private String urlServ = "https://neurona-turk128.c9.io/api/";
 
     public JSONArray getJSON() {
         StringBuilder result = new StringBuilder();
@@ -105,6 +72,30 @@ public class WebserviceActivity {
     }
 
 
+
+    public void gg(){
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(urlServ)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        IApiMethods api = retrofit.create(IApiMethods.class);
+
+        Call<Usuario> respuesta = api.findUser("67");
+        respuesta.enqueue(new Callback<Usuario>() {
+            @Override
+            public void onResponse(Call<Usuario> call, Response<Usuario> response) {
+                String ii ="";
+            }
+
+            @Override
+            public void onFailure(Call<Usuario> call, Throwable t) {
+                String ii ="";
+            }
+        });
+        String AAAA = "";
+    }
 }
 
 

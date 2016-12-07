@@ -12,14 +12,17 @@ public class Usuario {
 
     private String id;
     private String name;
+    private String email;
     private String Lat;
     private String Lon;
     private String Time;
 
-    public Usuario(String id, String name, String lat, String lon, String time){
+
+    public Usuario(String id, String name, String email, String lat, String lon, String time){
 
         this.id = id;
         this.name = name;
+        this.email = email;
         this.Lat = lat;
         this.Lon = lon;
         this.Time = time;
@@ -31,6 +34,10 @@ public class Usuario {
 
     public String getName(){
         return name;
+    }
+
+    public String getEmail(){
+        return email;
     }
 
     public String getLat(){ return  Lat;}

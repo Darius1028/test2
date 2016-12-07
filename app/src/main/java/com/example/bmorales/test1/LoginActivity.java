@@ -182,7 +182,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-        serv.infoUser(object);
+        serv.gg();
 
 
 
