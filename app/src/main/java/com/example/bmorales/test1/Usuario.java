@@ -15,17 +15,19 @@ public class Usuario {
     private String email;
     private String Lat;
     private String Lon;
-    private String Time;
+    private String date;
+    private String message;
 
 
-    public Usuario(String id, String name, String email, String lat, String lon, String time){
+    public Usuario(String id, String name, String email, String lat, String lon, String date, String message){
 
         this.id = id;
         this.name = name;
         this.email = email;
         this.Lat = lat;
         this.Lon = lon;
-        this.Time = time;
+        this.date = date;
+        this.message = message;
     }
 
     public String getId() {
@@ -49,7 +51,9 @@ public class Usuario {
     }
 
     public String getTime(){
-        return Time;
+        return date;
     }
+
+    public String getMessage() { return  message; }
 
 }

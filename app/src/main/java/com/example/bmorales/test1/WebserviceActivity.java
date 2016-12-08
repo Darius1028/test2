@@ -2,12 +2,16 @@ package com.example.bmorales.test1;
 
 
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 
@@ -32,48 +36,10 @@ import retrofit2.Callback;
 public class WebserviceActivity {
 
     private String urlServ = "https://neurona-turk128.c9.io/api/";
+    boolean success = false;
+    Usuario user = null;
 
-    public JSONArray getJSON() {
-        StringBuilder result = new StringBuilder();
-        URL url = null;
-        try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-            StrictMode.setThreadPolicy(policy);
-            String registrationUrl = String.format( urlServ + "todos");
-            url = new URL(registrationUrl);
-            URLConnection connection = url.openConnection();
-            HttpURLConnection httpConnection = (HttpURLConnection) connection;
-            int responseCode = httpConnection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-
-                InputStream is = httpConnection.getInputStream();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-
-                JSONArray json = new JSONArray(result.toString());
-                return json;
-
-            } else {
-                Log.w("MyApp", "failed: " + registrationUrl);
-                return null;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-
-         return null;
-    }
-
-
-
-    public void gg(){
+    public boolean login(JSONObject object, final Context context){
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(urlServ)
@@ -82,19 +48,32 @@ public class WebserviceActivity {
 
         IApiMethods api = retrofit.create(IApiMethods.class);
 
-        Call<Usuario> respuesta = api.findUser("67");
+
+        Call<Usuario> respuesta = null;
+        try {
+
+            respuesta = api.findUser(object.getString("id").toString(),object.getString("name").toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         respuesta.enqueue(new Callback<Usuario>() {
             @Override
             public void onResponse(Call<Usuario> call, Response<Usuario> response) {
-                String ii ="";
+                success = response.isSuccessful();
+                if(success) {
+                    user = response.body();
+                    Toast.makeText(context, user.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
             public void onFailure(Call<Usuario> call, Throwable t) {
-                String ii ="";
+                Log.e("REST", t.getMessage());
             }
         });
-        String AAAA = "";
+
+        return success;
     }
 }
 

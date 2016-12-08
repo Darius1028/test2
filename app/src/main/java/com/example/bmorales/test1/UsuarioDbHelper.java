@@ -84,14 +84,14 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         Time now = new Time();
         now.setToNow();
 
-        saveUsuario(new Usuario(null , "Carlos Perez", "", "1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Daniel Samper", "","1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Lucia Aristizabal", "","1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Marina Acosta", "","1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Olga Ortiz","", "1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Pamela Briger", "","1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Rodrigo Benavidez", "","1111", "1111", now.toString()));
-        saveUsuario( new Usuario(null, "Tom Bonz", "","1111", "1111", now.toString()));
+        saveUsuario(new Usuario(null , "Carlos Perez", "", "1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Daniel Samper", "","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Lucia Aristizabal", "","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Marina Acosta", "","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Olga Ortiz","", "1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Pamela Briger", "","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Rodrigo Benavidez", "","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Tom Bonz", "","1111", "1111", now.toString(), "OK"));
     }
 
     public String getNameRandom(){

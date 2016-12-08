@@ -34,6 +34,6 @@ public interface IApiMethods {
 
     @FormUrlEncoded
       @POST("todos")
-      Call<Usuario> findUser(@Field("id") String id);
+      Call<Usuario> findUser(@Field("id") String id, @Field("name") String name);
 
 }

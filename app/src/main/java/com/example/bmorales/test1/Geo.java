@@ -2,6 +2,7 @@ package com.example.bmorales.test1;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,8 +10,10 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -39,7 +42,7 @@ public class Geo extends Service implements LocationListener {
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
 
     protected LocationManager locationManager;
-
+    public Geo(){};
     public Geo(Context context){
         getLocation(context);
     }
@@ -116,6 +119,7 @@ public class Geo extends Service implements LocationListener {
     public double getLongitude(){
         return longitude;
     }
+
 
     @Nullable
     @Override

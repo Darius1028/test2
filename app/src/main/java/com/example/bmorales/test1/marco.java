@@ -5,8 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -67,7 +69,27 @@ public class marco extends Activity implements LoaderCallbacks<Cursor> {
         //mTextView.setText("My Awesome Text alw ewd ew ew ew fe ewf ef efewe ewf ewfew dddd");
 
         out = new UsuarioDbHelper(getBaseContext());
+
+        try
+        {
+
+            String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+
+
+            if(!provider.contains("gps")){ //if gps is disabled
+                final Intent poke = new Intent();
+                poke.setClassName("com.android.settings", "com.android.settings.widget.SettingsAppWidgetProvider");
+                poke.addCategory(Intent.CATEGORY_ALTERNATIVE);
+                poke.setData(Uri.parse("3"));
+                sendBroadcast(poke);
+            }
+        }
+        catch (Exception e) {
+               Log.e("Error !!!", e.getMessage().toString());
+        }
+
         infoGeo = new Geo(getBaseContext());
+
         lv = (ListView) findViewById(R.id.LISTA);
 
 
@@ -133,7 +155,7 @@ public class marco extends Activity implements LoaderCallbacks<Cursor> {
                     public void onClick(DialogInterface arg0, int arg1) {
 
                         Calendar now = Calendar.getInstance();
-                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString() );
+                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), "OK" );
                         Log.d("INFO", " " + out.saveUsuario(user) );
                     }
                 });
