@@ -42,7 +42,7 @@ public class WebserviceActivity {
     public boolean login(JSONObject object, final Context context){
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(urlServ)
+                .baseUrl("https://neurona-turk128.c9.io/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
