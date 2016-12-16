@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <fragment
+        android:name="com.example.bmorales.test1.FragmentSample"
         android:id="@+id/fragment_pace"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

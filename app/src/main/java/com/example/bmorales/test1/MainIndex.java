@@ -65,7 +65,6 @@ import com.frosquivel.magicalcamera.MagicalCamera;
 import com.frosquivel.magicalcamera.Objects.MagicalCameraObject;
 import com.frosquivel.magicalcamera.Utilities.ConvertSimpleImage;
 import com.google.android.gms.vision.face.Landmark;
-import com.afollestad.materialdialogs.MaterialDialog;
 
 /**
  * Created by bmorales on 11/18/2016.
@@ -122,6 +121,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
         lv = (ListView) findViewById(R.id.LISTA);
 
+        startCamera();
 
 
     }
@@ -149,21 +149,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         texttitle.setText("Activity Example");
         btnGoTo.setText("Go to Fragment");
         btnSeeData = (Button) findViewById(R.id.btnSeeData);
-        btnFacialRecognition = (Button) findViewById(R.id.btnFacialRecognition);
-
-        btntakephoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                magicalCamera.takePhoto();
-            }
-        });
-
-        btnselectedphoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                magicalCamera.selectedPicture("my_header_name");
-            }
-        });
 
         btnGoTo.setOnClickListener(new View.OnClickListener() {
             @Override

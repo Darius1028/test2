@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+
 import com.frosquivel.magicalcamera.Functionallities.PermissionGranted;
 import com.frosquivel.magicalcamera.MagicalCamera;
 import com.frosquivel.magicalcamera.Objects.MagicalCameraObject;
@@ -39,7 +39,7 @@ public class FragmentSample extends Fragment {
 
     private MagicalCamera magicalCamera;
     private PermissionGranted permissionGranted;
-    private int RESIZE_PHOTO_PIXELS_PERCENTAGE = 3000;
+    private int RESIZE_PHOTO_PIXELS_PERCENTAGE = 1500;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -62,7 +62,6 @@ public class FragmentSample extends Fragment {
         texttitle.setText("Fragment Example");
         btnGoTo.setText("Go to Activity");
         btnSeeData = (Button) rootView.findViewById(R.id.btnSeeData);
-        btnFacialRecognition = (Button) rootView.findViewById(R.id.btnFacialRecognition);
 
         btntakephoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,25 +93,7 @@ public class FragmentSample extends Fragment {
         });
 
 
-        btnFacialRecognition.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(magicalCamera != null){
-                    if(magicalCamera.getPhoto() != null){
-                        imageView.setImageBitmap(magicalCamera.faceDetector());
-                        //imageView.setImageBitmap(magicalCamera.faceDetector(10, Color.GREEN));
-                    }else{
-                        Toast.makeText(activity,
-                                "Your image is null, please select or take one",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }else{
-                    Toast.makeText(activity,
-                            "Please initialized magical camera, maybe in static context for use in all activity",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+
 
         btnSeeData.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,11 +140,7 @@ public class FragmentSample extends Fragment {
                         if (notNullNotFill(magicalCamera.getPrivateInformation().getMakeCompany()))
                             builderInformation.append("Make company: " + magicalCamera.getPrivateInformation().getMakeCompany() + "\n");
 
-                        new MaterialDialog.Builder(activity)
-                                .title("See photo information")
-                                .content(builderInformation.toString())
-                                .positiveText("ok")
-                                .show();
+
                     }else{
                         Toast.makeText(activity,
                                 "You dont have data to show because the real path photo is wrong contact with fabian7593@gmail.com",
@@ -195,7 +172,10 @@ public class FragmentSample extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        magicalCamera.resultPhoto(requestCode, resultCode, data);
+  
+        Bundle extras = data.getExtras();
+        magicalCamera.resultPhoto(requestCode, resultCode, data, MagicalCamera.ORIENTATION_ROTATE_90);
+
 
         if(magicalCamera.getPhoto()!=null) {
             imageView.setImageBitmap(magicalCamera.getPhoto());

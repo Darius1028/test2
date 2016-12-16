@@ -25,9 +25,11 @@ import java.net.URLConnection;
 
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.Call;
+
 import retrofit2.Callback;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 /**
  * Created by bmorales on 11/28/2016.
  */
@@ -42,7 +44,7 @@ public class WebserviceActivity {
     public boolean login(JSONObject object, final Context context){
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://neurona-turk128.c9.io/api/")
+                .baseUrl(urlServ)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
