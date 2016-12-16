@@ -4,6 +4,7 @@ package com.example.bmorales.test1;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +40,7 @@ public class FragmentSample extends Fragment {
 
     private MagicalCamera magicalCamera;
     private PermissionGranted permissionGranted;
-    private int RESIZE_PHOTO_PIXELS_PERCENTAGE = 1500;
+    private int RESIZE_PHOTO_PIXELS_PERCENTAGE = 80;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -171,9 +172,12 @@ public class FragmentSample extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+
+
         super.onActivityResult(requestCode, resultCode, data);
-  
-        Bundle extras = data.getExtras();
+
+
         magicalCamera.resultPhoto(requestCode, resultCode, data, MagicalCamera.ORIENTATION_ROTATE_90);
 
 
