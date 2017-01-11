@@ -3,7 +3,7 @@
     <item name="primary" type="color">#9a28a1</item>
     <item name="primaryDark" type="color">#5c1760</item>
     <item name="textColorPrimary" type="color">@android:color/white</item>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimary">#3f51b5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorPrimaryCustom">#6f5499</color>
     <color name="colorPrimaryInfo">#31708f</color>

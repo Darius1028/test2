@@ -17,53 +17,70 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         tools:ignore="UnusedAttribute"/>
 
-    <EditText
-        android:layout_width="311dp"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:ems="10"
-        android:id="@+id/out" />
+
+    <LinearLayout
+    android:orientation="horizontal"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
 
     <Button
         android:text="ELIMINAR DATA"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:id="@+id/DROP"
-        android:drawableLeft="@android:drawable/arrow_down_float"
         android:backgroundTint="@color/colorPrimaryCustom"
         android:onClick="buttonPressDrop"
-        android:background="@android:drawable/alert_light_frame" />
+        android:background="@android:drawable/alert_light_frame"
+        android:textAppearance="@style/TextAppearance.AppCompat" />
 
     <Button
         android:text="ENLISTAR DATOS"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:id="@+id/GET"
-        android:drawableLeft="@android:drawable/arrow_down_float"
         android:backgroundTint="@color/colorPrimaryCustom"
         android:onClick="getRandom"
-        android:background="@android:drawable/alert_light_frame" />
+        android:background="@android:drawable/alert_light_frame"
+        android:textAppearance="@style/TextAppearance.AppCompat" />
 
     <Button
-        android:text="OPTENER LOCALIZACIÓN"
-        android:layout_width="match_parent"
+        android:text="LOCALIZACIÓN"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:id="@+id/GEO"
-        android:drawableLeft="@android:drawable/arrow_down_float"
         android:backgroundTint="@color/colorPrimaryCustom"
         android:background="@android:drawable/alert_light_frame"
         android:onClick="getGeo"
-        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:textAppearance="@style/TextAppearance.AppCompat"
         style="@style/Widget.AppCompat.Button.Small" />
-
+     </LinearLayout>
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="100px"
+        android:layout_height="100dp"
         android:gravity="center"
-
         android:id="@+id/LISTA" />
+
+    <Button
+        android:text="FOTO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/PICTURE"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:onClick="getImage"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button" />
+
+
+    <ImageView
+        android:adjustViewBounds="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:id="@+id/imageView1" />
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -78,43 +95,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:layout_gravity="center"
-                android:background="@color/com_facebook_button_login_silver_background_color" />
-
-            <Button
-                android:id="@+id/btntakephoto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="    Take Photo    " />
-
-            <Button
-                android:id="@+id/btnselectedphoto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Selected photo" />
-
             <Button
                 android:id="@+id/btnGoTo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center" />
 
-
-            <Button
-                android:id="@+id/btnSeeData"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="See photo data" />
-
-
         </LinearLayout>
     </ScrollView>
 
 </LinearLayout>
+
+

@@ -10,7 +10,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -45,8 +48,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -72,6 +79,12 @@ import com.google.android.gms.vision.face.Landmark;
 /////extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
+    private static final String BITMAP_STORAGE_KEY = "viewbitmap";
+    private static final String IMAGEVIEW_VISIBILITY_STORAGE_KEY = "imageviewvisibility";
+    private ImageView mImageView;
+    private Bitmap mImageBitmap;
+
+
     private TextView mTextView;
     private UsuarioDbHelper out;
     private Geo infoGeo;
@@ -84,12 +97,20 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     private Button btntakephoto;
     private Button btnselectedphoto;
     private Button btnGoTo;
+    private Button btnPicture;
     private Button btnSeeData;
     private Button btnFacialRecognition;
     private TextView texttitle;
 
     private PermissionGranted permissionGranted;
     private int RESIZE_PHOTO_PIXELS_PERCENTAGE = 3000;
+
+    private String mCurrentPhotoPath;
+
+    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
+
+    private AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -123,32 +144,35 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
         startCamera();
 
+        //btnPicture = (Button) findViewById(R.id.PICTURE);
+
+        //btnPicture.setOnClickListener(takePictureHandler);
+
+        mImageView = (ImageView) findViewById(R.id.imageView1);
+        mImageBitmap = null;
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+            mAlbumStorageDirFactory = new FroyoAlbumDirFactory();
+        } else {
+            mAlbumStorageDirFactory = new BaseAlbumDirFactory();
+        }
 
     }
 
 
+    View.OnClickListener takePictureHandler = new View.OnClickListener(){
+        public void onClick(View v){
+            dispatchTakePictureIntent();
+        };
+    };
+
     public void startCamera(){
 
-        permissionGranted = new PermissionGranted(this);
-        //permission for take photo, it is false if the user check deny
-        permissionGranted.checkCameraPermission();
-        //for search and write photoss in device internal memory
-        //normal or SD memory
-        permissionGranted.checkReadExternalPermission();
-        permissionGranted.checkWriteExternalPermission();
-        //permission for location for use the `photo information device.
-        permissionGranted.checkLocationPermission();
 
-        magicalCamera = new MagicalCamera(this, RESIZE_PHOTO_PIXELS_PERCENTAGE, permissionGranted);
-
-        imageView =  (ImageView) findViewById(R.id.imageView);
-        btntakephoto =  (Button) findViewById(R.id.btntakephoto);
-        btnselectedphoto =  (Button) findViewById(R.id.btnselectedphoto);
         btnGoTo =  (Button) findViewById(R.id.btnGoTo);
-        texttitle =  (TextView) findViewById(R.id.texttitle);
-        texttitle.setText("Activity Example");
         btnGoTo.setText("Go to Fragment");
-        btnSeeData = (Button) findViewById(R.id.btnSeeData);
+
 
         btnGoTo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,9 +180,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
                 startActivity(new Intent(MainIndex.this, ActivityForFragment.class));
             }
         });
-
-
-
 
 
     }
@@ -194,14 +215,13 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         //out.bulkData();
     }
 
+
     public void buttonPressDrop(View v){
         out.dropALL();
     }
 
 
     public void getRandom(View v){
-        mTextView = (TextView) findViewById(R.id.out);
-        mTextView.setText(out.getNameRandom());
         fillData(out.getLista());
     }
 
@@ -209,7 +229,9 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         dialogBox();
     };
 
-
+    public void getImage(View v){
+        dialogBoxPicture();
+    };
     public void dialogBox() {
         infoGeo.getLocation(getBaseContext());
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -238,6 +260,151 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+
+    public void dialogBoxPicture() {
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        alertDialogBuilder.setPositiveButton("Foto",
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        dispatchTakePictureIntent();
+                    }
+                });
+        alertDialogBuilder.setNegativeButton("File",
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+
+                    }
+                });
+        alertDialogBuilder.setNegativeButton("cancel",
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+
+                    }
+                });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    private void setPic() {
+
+		/* There isn't enough memory to open up more than a couple camera photos */
+		/* So pre-scale the target bitmap into which the file is decoded */
+
+		/* Get the size of the ImageView */
+        int targetW = mImageView.getWidth();
+        int targetH = mImageView.getHeight();
+
+		/* Get the size of the image */
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+		/* Figure out which way needs to be reduced less */
+        int scaleFactor = 1;
+        if ((targetW > 0) || (targetH > 0)) {
+            scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        }
+
+		/* Set bitmap options to scale the image decode target */
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+		/* Decode the JPEG file into a Bitmap */
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+
+		/* Associate the Bitmap to the ImageView */
+        mImageView.setImageBitmap(bitmap);
+        mImageView.setVisibility(View.VISIBLE);
+
+    }
+
+    private void galleryAddPic(){
+        Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANER_SCAN_FILE");
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        this.sendBroadcast(mediaScanIntent);
+
+    };
+
+
+    /* Photo album for this application */
+    private String getAlbumName() {
+        return getString(R.string.album_name);
+    }
+
+    private File getAlbumDir() {
+        File storageDir = null;
+
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+
+            storageDir = mAlbumStorageDirFactory.getAlbumStorageDir(getAlbumName());
+
+            if (storageDir != null) {
+                if (! storageDir.mkdirs()) {
+                    if (! storageDir.exists()){
+                        Log.d("CameraSample", "failed to create directory");
+                        return null;
+                    }
+                }
+            }
+
+        } else {
+            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+        }
+
+        return storageDir;
+    }
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+        File albumF = getAlbumDir();
+        File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
+        return imageF;
+    }
+
+    private File setUpPhotoFile() throws IOException {
+
+        File f = createImageFile();
+        mCurrentPhotoPath = f.getAbsolutePath();
+
+        return f;
+    }
+    private void dispatchTakePictureIntent() {
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                File f = null;
+
+                try {
+                    f = setUpPhotoFile();
+                    mCurrentPhotoPath = f.getAbsolutePath();
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    f = null;
+                    mCurrentPhotoPath = null;
+                }
+
+
+        startActivityForResult(takePictureIntent,121);
+    }
+
+
 
     /////////////////////////////////////////////////////
     /////////////////tooll bar///////////////////////////
@@ -296,46 +463,22 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //this is for rotate picture in this method
-        //magicalCamera.resultPhoto(requestCode, resultCode, data, MagicalCamera.ORIENTATION_ROTATE_180);
-        magicalCamera.resultPhoto(requestCode, resultCode, data);
-
-        if(magicalCamera.getPhoto()!=null) {
-            //another form to rotate image
-
-           // magicalCamera.rotatePicture(magicalCamera.getPhoto(), MagicalCamera.ORIENTATION_ROTATE_90);
-
-            //set the photo in image view
-            imageView.setImageBitmap(magicalCamera.getPhoto());
-
-            String path = magicalCamera.savePhotoInMemoryDevice(magicalCamera.getPhoto(), "myTestPhoto", true);
-
-            //CONVERT BITMAP EXAMPLE COMMENT
-            //convert the bitmap to bytes
-            /*byte[] bytesArray =  ConvertSimpleImage.bitmapToBytes(magicalCamera.getPhoto(), MagicalCamera.PNG);
-            //convert the bytes to string 64, with this form is easly to send by web service or store data in DB
-            String imageBase64 = ConvertSimpleImage.bytesToStringBase64(bytesArray);
-
-            //if you need to revert the process
-            byte[] anotherArrayBytes = ConvertSimpleImage.stringBase64ToBytes(imageBase64);
-
-            //again deserialize the image
-            Bitmap myImageAgain = ConvertSimpleImage.bytesToBitmap(anotherArrayBytes);
-            */
-
-            if (path != null) {
-                Toast.makeText(MainIndex.this,
-                        "The photo is save in device, please check this path: " + path,
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainIndex.this,
-                        "Sorry your photo dont write in devide, please contact with fabian7593@gmail and say this error",
-                        Toast.LENGTH_SHORT).show();
+        switch (requestCode) {
+            case 121: {
+                if (resultCode == RESULT_OK) {
+                    handleBigCameraPhoto();
+                }
+                break;
             }
-        }else{
-            Toast.makeText(MainIndex.this,
-                    "Your image is null, please debug, or test with another device, or maybe contact with fabian7593@gmail.com for try to fix the bug, thanks and sorry",
-                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handleBigCameraPhoto(){
+
+        if(mCurrentPhotoPath != null ){
+            setPic();
+            galleryAddPic();
+            mCurrentPhotoPath = null;
         }
     }
 
