@@ -1,77 +1,62 @@
 package com.example.bmorales.test1;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
-import android.app.Activity;
+
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
+
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
+
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
-import android.content.CursorLoader;
+
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
+
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.text.format.Time;
-import android.view.KeyEvent;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
+
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
+
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-
 
 import android.util.Log;
 import android.widget.Toast;
-
-import static android.Manifest.permission.READ_CONTACTS;
-
-import com.example.bmorales.test1.UsuarioDbHelper;
-import com.example.bmorales.test1.Usuario;
-import com.example.bmorales.test1.Geo;
-import com.example.bmorales.test1.WebserviceActivity;
 import com.facebook.login.LoginManager;
-import com.frosquivel.magicalcamera.Functionallities.PermissionGranted;
 import com.frosquivel.magicalcamera.MagicalCamera;
-import com.frosquivel.magicalcamera.Objects.MagicalCameraObject;
-import com.frosquivel.magicalcamera.Utilities.ConvertSimpleImage;
-import com.google.android.gms.vision.face.Landmark;
+
 
 /**
  * Created by bmorales on 11/18/2016.
@@ -91,19 +76,9 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     private ListView lv;
     private Toolbar toolbar;
     private Context context;
-    private MagicalCamera magicalCamera;
+    private WebserviceActivity serv;
 
-    private ImageView imageView;
-    private Button btntakephoto;
-    private Button btnselectedphoto;
     private Button btnGoTo;
-    private Button btnPicture;
-    private Button btnSeeData;
-    private Button btnFacialRecognition;
-    private TextView texttitle;
-
-    private PermissionGranted permissionGranted;
-    private int RESIZE_PHOTO_PIXELS_PERCENTAGE = 3000;
 
     private String mCurrentPhotoPath;
 
@@ -112,10 +87,15 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
     private AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 
+    private int MY_REQUEST_CODE_CAMERA = 121;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainindex);
+
+        ////  inicializacion nodejs Neurona
+        serv = new WebserviceActivity();
 
         out = new UsuarioDbHelper(getBaseContext());
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -157,6 +137,8 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         } else {
             mAlbumStorageDirFactory = new BaseAlbumDirFactory();
         }
+
+
 
     }
 
@@ -215,11 +197,9 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         //out.bulkData();
     }
 
-
     public void buttonPressDrop(View v){
         out.dropALL();
     }
-
 
     public void getRandom(View v){
         fillData(out.getLista());
@@ -260,30 +240,32 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-
     public void dialogBoxPicture() {
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+        alertDialogBuilder.setTitle("Imagen");
 
-        alertDialogBuilder.setPositiveButton("Foto",
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
+        alertDialogBuilder.setItems(new CharSequence[]{"Tomar Foto","Seleccionar Foto","Otro"}, new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0:
                         dispatchTakePictureIntent();
-                    }
-                });
-        alertDialogBuilder.setNegativeButton("File",
-                new DialogInterface.OnClickListener() {
+                        Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
+                        serv.uploadFile(imageUri);
+                        break;
+                    case 1:
+                        getImageFile();
+                        break;
+                    case 2:
+                        break;
 
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
+                }
+            }
+        });
 
-                    }
-                });
         alertDialogBuilder.setNegativeButton("cancel",
                 new DialogInterface.OnClickListener() {
-
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
 
@@ -293,7 +275,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-
     private void setPic() {
 
 		/* There isn't enough memory to open up more than a couple camera photos */
@@ -313,12 +294,12 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 		/* Figure out which way needs to be reduced less */
         int scaleFactor = 1;
         if ((targetW > 0) || (targetH > 0)) {
-            scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+            scaleFactor = Math.min(photoW/(targetW - 100), photoH/(targetH - 100));
         }
 
 		/* Set bitmap options to scale the image decode target */
         bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
+        //bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
 		/* Decode the JPEG file into a Bitmap */
@@ -329,13 +310,35 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         mImageView.setVisibility(View.VISIBLE);
 
     }
+    private void getImageFile(){
 
+
+
+
+        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(i,122);
+
+
+
+
+
+
+
+    };
+    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+        ParcelFileDescriptor parcelFileDescriptor =
+                getContentResolver().openFileDescriptor(uri, "r");
+
+        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+        parcelFileDescriptor.close();
+        return image;
+    }
     private void galleryAddPic(){
         Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANER_SCAN_FILE");
         File f = new File(mCurrentPhotoPath);
         Uri contentUri = Uri.fromFile(f);
         this.sendBroadcast(mediaScanIntent);
-
     };
 
 
@@ -350,6 +353,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 
             storageDir = mAlbumStorageDirFactory.getAlbumStorageDir(getAlbumName());
+
 
             if (storageDir != null) {
                 if (! storageDir.mkdirs()) {
@@ -400,8 +404,23 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
                     mCurrentPhotoPath = null;
                 }
 
+        // Check permission for CAMERA
 
-        startActivityForResult(takePictureIntent,121);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Check Permissions Now
+            // Callback onRequestPermissionsResult interceptado na Activity MainActivity
+
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},
+                    MY_REQUEST_CODE_CAMERA);
+            // permission has been granted, continue as usual
+
+            Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(captureIntent, 0);
+        }
+
+
+        startActivityForResult(takePictureIntent,MY_REQUEST_CODE_CAMERA);
     }
 
 
@@ -470,6 +489,30 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
                 }
                 break;
             }
+            case 122:
+                if (resultCode == RESULT_OK && null != data) {
+                    Uri selectedImage = data.getData();
+                    String[] filePathColumn = { MediaStore.Images.Media.DATA};
+
+                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    String picturePath = cursor.getString(columnIndex);
+                    cursor.close();
+
+                    Bitmap bmp = null;
+
+                    try{
+                        bmp = getBitmapFromUri(selectedImage);
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+
+                    mImageView.setImageBitmap(bmp);
+
+                }
+                break;
         }
     }
 
@@ -484,6 +527,16 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        magicalCamera.permissionGrant(requestCode, permissions, grantResults);
+        if (requestCode == MY_REQUEST_CODE_CAMERA ) {
+
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Now user should be able to use camera
+            }
+            else {
+                // Your app will not have this permission. Turn off all functions
+                // that require this permission or it will force close like your
+                // original question
+            }
+        }
     }
 }

@@ -1,10 +1,18 @@
 package com.example.bmorales.test1;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
@@ -164,6 +172,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     object.put("id",AccessToken.getCurrentAccessToken().getUserId().toString());
                     object.put("name","");
                     serv.login(object, this.getApplicationContext());
+
+
+/*
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                        && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            121);
+
+                    return;
+                }
+
+                final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
+                final String orderBy = MediaStore.Images.Media._ID;
+
+                //Stores all the images from the gallery in Cursor
+                Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null,null, orderBy);
+
+                //Total number of images
+                int count = cursor.getCount();
+
+                //Create an array to store path to all the images
+                String[] arrPath = new String[count];
+
+                for (int i = 0; i < count; i++) {
+                    cursor.moveToPosition(i);
+                    int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                    //Store the path of the image
+                    arrPath[i]= cursor.getString(dataColumnIndex);
+                    Log.i("PATH", arrPath[i]);
+                }
+
+                    */
+
             }
             else{
                 serv.login(object, this.getApplicationContext());
