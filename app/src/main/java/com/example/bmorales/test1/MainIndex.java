@@ -2,6 +2,8 @@ package com.example.bmorales.test1;
 
 
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -55,7 +57,9 @@ import java.util.Date;
 import android.util.Log;
 import android.widget.Toast;
 import com.facebook.login.LoginManager;
-import com.frosquivel.magicalcamera.MagicalCamera;
+
+
+
 
 
 /**
@@ -64,11 +68,8 @@ import com.frosquivel.magicalcamera.MagicalCamera;
 /////extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    private static final String BITMAP_STORAGE_KEY = "viewbitmap";
-    private static final String IMAGEVIEW_VISIBILITY_STORAGE_KEY = "imageviewvisibility";
     private ImageView mImageView;
     private Bitmap mImageBitmap;
-
 
     private TextView mTextView;
     private UsuarioDbHelper out;
@@ -88,11 +89,14 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     private AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 
     private int MY_REQUEST_CODE_CAMERA = 121;
+    private int MY_REQUEST_CODE_EXTERNAL_STORAGE = 130;
+    private int MY_REQUEST_CODE_CAMERA_REQUEST = 160;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainindex);
+
 
         ////  inicializacion nodejs Neurona
         serv = new WebserviceActivity();
@@ -124,19 +128,10 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
         startCamera();
 
-        //btnPicture = (Button) findViewById(R.id.PICTURE);
 
-        //btnPicture.setOnClickListener(takePictureHandler);
 
         mImageView = (ImageView) findViewById(R.id.imageView1);
         mImageBitmap = null;
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            mAlbumStorageDirFactory = new FroyoAlbumDirFactory();
-        } else {
-            mAlbumStorageDirFactory = new BaseAlbumDirFactory();
-        }
 
 
 
@@ -145,7 +140,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
     View.OnClickListener takePictureHandler = new View.OnClickListener(){
         public void onClick(View v){
-            dispatchTakePictureIntent();
+
         };
     };
 
@@ -250,9 +245,10 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
             public void onClick(DialogInterface dialog, int which) {
                 switch (which){
                     case 0:
-                        dispatchTakePictureIntent();
-                        Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
-                        serv.uploadFile(imageUri);
+                        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(cameraIntent, MY_REQUEST_CODE_CAMERA_REQUEST);
+                        //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
+                       // serv.uploadFile(imageUri);
                         break;
                     case 1:
                         getImageFile();
@@ -275,55 +271,11 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-    private void setPic() {
 
-		/* There isn't enough memory to open up more than a couple camera photos */
-		/* So pre-scale the target bitmap into which the file is decoded */
-
-		/* Get the size of the ImageView */
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-		/* Get the size of the image */
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-		/* Figure out which way needs to be reduced less */
-        int scaleFactor = 1;
-        if ((targetW > 0) || (targetH > 0)) {
-            scaleFactor = Math.min(photoW/(targetW - 100), photoH/(targetH - 100));
-        }
-
-		/* Set bitmap options to scale the image decode target */
-        bmOptions.inJustDecodeBounds = false;
-        //bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-		/* Decode the JPEG file into a Bitmap */
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-
-		/* Associate the Bitmap to the ImageView */
-        mImageView.setImageBitmap(bitmap);
-        mImageView.setVisibility(View.VISIBLE);
-
-    }
     private void getImageFile(){
-
-
-
 
         Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(i,122);
-
-
-
-
-
-
-
     };
     private Bitmap getBitmapFromUri(Uri uri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =
@@ -334,94 +286,8 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         parcelFileDescriptor.close();
         return image;
     }
-    private void galleryAddPic(){
-        Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANER_SCAN_FILE");
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        this.sendBroadcast(mediaScanIntent);
-    };
 
 
-    /* Photo album for this application */
-    private String getAlbumName() {
-        return getString(R.string.album_name);
-    }
-
-    private File getAlbumDir() {
-        File storageDir = null;
-
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-
-            storageDir = mAlbumStorageDirFactory.getAlbumStorageDir(getAlbumName());
-
-
-            if (storageDir != null) {
-                if (! storageDir.mkdirs()) {
-                    if (! storageDir.exists()){
-                        Log.d("CameraSample", "failed to create directory");
-                        return null;
-                    }
-                }
-            }
-
-        } else {
-            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
-        }
-
-        return storageDir;
-    }
-
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
-        File albumF = getAlbumDir();
-        File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
-        return imageF;
-    }
-
-    private File setUpPhotoFile() throws IOException {
-
-        File f = createImageFile();
-        mCurrentPhotoPath = f.getAbsolutePath();
-
-        return f;
-    }
-    private void dispatchTakePictureIntent() {
-
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                File f = null;
-
-                try {
-                    f = setUpPhotoFile();
-                    mCurrentPhotoPath = f.getAbsolutePath();
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    f = null;
-                    mCurrentPhotoPath = null;
-                }
-
-        // Check permission for CAMERA
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Check Permissions Now
-            // Callback onRequestPermissionsResult interceptado na Activity MainActivity
-
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},
-                    MY_REQUEST_CODE_CAMERA);
-            // permission has been granted, continue as usual
-
-            Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(captureIntent, 0);
-        }
-
-
-        startActivityForResult(takePictureIntent,MY_REQUEST_CODE_CAMERA);
-    }
 
 
 
@@ -483,9 +349,11 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 121: {
+            case 160: {
                 if (resultCode == RESULT_OK) {
-                    handleBigCameraPhoto();
+                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+
+                    mImageView.setImageBitmap(bitmap);
                 }
                 break;
             }
@@ -516,27 +384,65 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         }
     }
 
-    private void handleBigCameraPhoto(){
 
-        if(mCurrentPhotoPath != null ){
-            setPic();
-            galleryAddPic();
-            mCurrentPhotoPath = null;
-        }
-    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == MY_REQUEST_CODE_CAMERA ) {
+        switch(requestCode){
 
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Now user should be able to use camera
-            }
-            else {
-                // Your app will not have this permission. Turn off all functions
-                // that require this permission or it will force close like your
-                // original question
-            }
+            case 121:
+                    if ( grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    }
+                    else {
+
+                    }
+                break;
+            case 130:
+                    if ( grantResults.length == 1 &&grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(this,"Se creo carpeta",
+                                Toast.LENGTH_SHORT).show();
+
+                    } else {
+                        Toast.makeText(this,"Error al crear carpeta",
+                                Toast.LENGTH_SHORT).show();
+                        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+                    }
+                break;
+
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    public boolean CheckStoragePermission() {
+        int permissionCheckRead = ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissionCheckRead != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_REQUEST_CODE_EXTERNAL_STORAGE);
+            } else {
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_REQUEST_CODE_EXTERNAL_STORAGE);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+            return false;
+        } else
+            return true;
+    }
+
 }
