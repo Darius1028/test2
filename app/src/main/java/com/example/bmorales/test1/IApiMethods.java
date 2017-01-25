@@ -47,7 +47,9 @@ public interface IApiMethods {
     @POST("file_upload")
     Call<ResponseBody> uploadFile(
             @Part("description") RequestBody description,
+            @Part("user") RequestBody user,
             @Part MultipartBody.Part file);
+
 
 
 }

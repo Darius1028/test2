@@ -1,7 +1,10 @@
 package com.example.bmorales.test1;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -9,22 +12,30 @@ import android.util.Log;
 import android.widget.Toast;
 
 
+import com.google.gson.Gson;
+
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Calendar;
 
+import id.zelory.compressor.Compressor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -47,7 +58,9 @@ public class WebserviceActivity {
     boolean success = false;
     Usuario user = null;
 
+
     public boolean login(JSONObject object, final Context context){
+
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(urlServ)
@@ -85,7 +98,7 @@ public class WebserviceActivity {
     }
 
 
-    public void uploadFile(Uri fileUri) {
+    public void uploadFile(Uri fileUri, String userId, Geo loc, final Context context) {
         // create upload service client
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -99,28 +112,58 @@ public class WebserviceActivity {
         // use the FileUtils to get the actual file by uri
 
         File file = FileUtils.getFile(fileUri.getPath());
+        File compressedImageFile = Compressor.getDefault(context).compressToFile(file);
+
+
 
         // create RequestBody instance from file
         RequestBody requestFile =
-                RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                RequestBody.create(MediaType.parse("image/jpg"), compressedImageFile);
 
+        //RequestBody.create(MediaType.parse("multipart/form-data"), file);
+
+
+        ///////////////////////////////////////////////////////////////
         // MultipartBody.Part is used to send also the actual file name
+        ///////////////////////////////////////////////////////////////
         MultipartBody.Part body =
-                MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+                MultipartBody.Part.createFormData("picture", file.getName(), requestFile);
 
+        /////////////////////////////////////////////////
         // add another part within the multipart request
-        String descriptionString = "hello, this is description speaking";
+        /////////////////////////////////////////////////
+        String descriptionString = "jpg";
         RequestBody description =
                 RequestBody.create(
                         MediaType.parse("multipart/form-data"), descriptionString);
 
+        ////////////////////////////////////////////////
+        // add another part within the multipart request
+        ///////////////////////////////////////////////
+
+        Calendar now = Calendar.getInstance();
+        Usuario iu =  new Usuario(userId, "", "", String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), now.getTime().toString(), "Envio imagen");
+
+        RequestBody user =
+                RequestBody.create(
+                        MediaType.parse("multipart/form-data"),  iu.toJSON());
+
+
         // finally, execute the request
-        Call<ResponseBody> call = api.uploadFile(description, body);
+        Call<ResponseBody> call = api.uploadFile(description, user, body);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call,
                                    Response<ResponseBody> response) {
-                Log.v("Upload", "success");
+                ResponseBody temp = response.body();
+                try {
+                    JSONObject jsonObj = new JSONObject(temp.string());
+                    Log.v("Upload", "success " + jsonObj.getInt("msg"));
+                }
+                catch (Throwable t){
+                    Log.v("Upload error", "error Json error " + t.toString() );
+                }
+
             }
 
             @Override
@@ -129,8 +172,6 @@ public class WebserviceActivity {
             }
         });
     }
-
-
 }
 
 

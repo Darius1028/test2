@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -56,6 +55,8 @@ import java.util.Date;
 
 import android.util.Log;
 import android.widget.Toast;
+
+import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 
 
@@ -91,6 +92,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     private int MY_REQUEST_CODE_CAMERA = 121;
     private int MY_REQUEST_CODE_EXTERNAL_STORAGE = 130;
     private int MY_REQUEST_CODE_CAMERA_REQUEST = 160;
+    private int MY_REQUEST_CODE_GPS = 140;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -122,18 +124,12 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
                Log.e("Error !!!", e.getMessage().toString());
         }
 
-        infoGeo = new Geo(getBaseContext());
+
 
         lv = (ListView) findViewById(R.id.LISTA);
 
-        startCamera();
-
-
-
         mImageView = (ImageView) findViewById(R.id.imageView1);
         mImageBitmap = null;
-
-
 
     }
 
@@ -143,23 +139,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
         };
     };
-
-    public void startCamera(){
-
-
-        btnGoTo =  (Button) findViewById(R.id.btnGoTo);
-        btnGoTo.setText("Go to Fragment");
-
-
-        btnGoTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainIndex.this, ActivityForFragment.class));
-            }
-        });
-
-
-    }
 
 
     public void fillData(ArrayList<String> arrayInfo){
@@ -208,7 +187,30 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         dialogBoxPicture();
     };
     public void dialogBox() {
-        infoGeo.getLocation(getBaseContext());
+
+
+        if(Build.VERSION.SDK_INT >= 23){
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
+                Log.d("GPS", "00" );
+
+                if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_COARSE_LOCATION ) ){
+                    Log.d("GPS", "OK ACCESS_COARSE_LOCATION" );
+
+                }
+                else if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_FINE_LOCATION ) ){
+                    Log.d("GPS", "OK ACCESS_FINE_LOCATION" );
+
+                }
+
+                ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},1);
+
+
+            }
+        }
+
+
+        infoGeo = new Geo(getBaseContext());
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage(" Lat: " + infoGeo.getLatitude() + " Log: " + infoGeo.getLongitude());
         alertDialogBuilder.setPositiveButton("Ok",
@@ -219,7 +221,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
                         Calendar now = Calendar.getInstance();
                         Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), "OK" );
-                        Log.d("INFO", " " + out.saveUsuario(user) );
+
                     }
                 });
 
@@ -247,8 +249,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
                     case 0:
                         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                         startActivityForResult(cameraIntent, MY_REQUEST_CODE_CAMERA_REQUEST);
-                        //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
-                       // serv.uploadFile(imageUri);
                         break;
                     case 1:
                         getImageFile();
@@ -273,7 +273,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     }
 
     private void getImageFile(){
-
         Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(i,122);
     };
@@ -373,6 +372,44 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
                     try{
                         bmp = getBitmapFromUri(selectedImage);
+
+                        //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
+                        if(Build.VERSION.SDK_INT >= 23){
+                            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ){
+                                Log.d("STORAGE", "Check" );
+
+                                if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.READ_EXTERNAL_STORAGE ) ){
+                                    Log.d("STORAGE", "OK ACCESS_COARSE_LOCATION" );
+                                }
+
+
+                                ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+
+
+                            }
+
+                                if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
+                                    Log.d("GPS", "00" );
+
+                                    if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_COARSE_LOCATION ) ){
+                                        Log.d("GPS", "OK ACCESS_COARSE_LOCATION" );
+
+                                    }
+                                    else if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_FINE_LOCATION ) ){
+                                        Log.d("GPS", "OK ACCESS_FINE_LOCATION" );
+
+                                    }
+
+                                    ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},1);
+
+
+                                }
+
+
+                        }
+                        infoGeo = new Geo(getBaseContext());
+                        serv.uploadFile(Uri.parse(picturePath), AccessToken.getCurrentAccessToken().getUserId().toString(), infoGeo, getBaseContext());
                     }catch (IOException e){
                         e.printStackTrace();
                     }
@@ -392,24 +429,13 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         switch(requestCode){
 
             case 121:
-                    if ( grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    }
-                    else {
-
-                    }
+                Log.v("", "CAMARA Permiso");
                 break;
             case 130:
-                    if ( grantResults.length == 1 &&grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this,"Se creo carpeta",
-                                Toast.LENGTH_SHORT).show();
-
-                    } else {
-                        Toast.makeText(this,"Error al crear carpeta",
-                                Toast.LENGTH_SHORT).show();
-                        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-                    }
+                Log.v("", "STORAGE Permiso");
+                break;
+            case 140:
+                Log.v("", "GPS Permiso");
                 break;
 
         }

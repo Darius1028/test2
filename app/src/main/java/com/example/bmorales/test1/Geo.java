@@ -1,6 +1,7 @@
 package com.example.bmorales.test1;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -41,6 +43,8 @@ public class Geo extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
 
+    private static final int MY_PERMISSIONS = 1;
+
     protected LocationManager locationManager;
     public Geo(){};
     public Geo(Context context){
@@ -48,7 +52,6 @@ public class Geo extends Service implements LocationListener {
     }
 
     public Location getLocation(Context context){
-
         try{
           locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
@@ -64,12 +67,7 @@ public class Geo extends Service implements LocationListener {
 
                 this.canGetLocation = false;
                 int status = context.getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, context.getPackageName());
-
-                //Log.d("GPS SALUDOSSSSSSSSSSSSS", " AQUIIIIIIIIIII 2222222222 " + status );
                 if (status == PackageManager.PERMISSION_GRANTED) {
-
-                    //ActivityCompat.requestPermissions( this, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  },  LOCATION_SERVICE.MY_PERMISSION_ACCESS_COURSE_LOCATION );
-
                     if(isNetworkEnable) {
                         locationManager.requestLocationUpdates(
                                 LocationManager.NETWORK_PROVIDER,
@@ -77,7 +75,6 @@ public class Geo extends Service implements LocationListener {
                                 MIN_DISTANCE_CHANGE_FOR_UPDATES,
                                 this
                     );
-
                 }
                         if(locationManager != null){
                             location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
@@ -146,4 +143,6 @@ public class Geo extends Service implements LocationListener {
     public void onProviderDisabled(String provider) {
 
     }
+
+
 }
