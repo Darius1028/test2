@@ -1,40 +1,15 @@
 package com.example.bmorales.test1;
 
-import android.app.Activity;
+
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
-
-
-import com.google.gson.Gson;
-
 import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Calendar;
-
 import id.zelory.compressor.Compressor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -98,7 +73,7 @@ public class WebserviceActivity {
     }
 
 
-    public void uploadFile(Uri fileUri, String userId, Geo loc, final Context context) {
+    public void uploadFile(Uri fileUri, String userId, Geo loc, Context context) {
         // create upload service client
 
         Retrofit retrofit = new Retrofit.Builder()

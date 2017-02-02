@@ -69,14 +69,18 @@ public class Geo extends Service implements LocationListener {
                 int status = context.getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, context.getPackageName());
                 if (status == PackageManager.PERMISSION_GRANTED) {
                     if(isNetworkEnable) {
+
                         locationManager.requestLocationUpdates(
                                 LocationManager.NETWORK_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
                                 MIN_DISTANCE_CHANGE_FOR_UPDATES,
                                 this
-                    );
-                }
-                        if(locationManager != null){
+                        );
+
+                    }
+
+                    if(locationManager != null){
+
                             location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
                             Log.d("UPDATE fase 1", " UPDATE GPS LOCATION " );
                             if(location != null){
@@ -84,10 +88,10 @@ public class Geo extends Service implements LocationListener {
                                 longitude = location.getLongitude();
                                 Log.d("UPDATE", " UPDATE GPS LOCATION " );
                             }
-                        }
                     }
+                }
 
-                    if(isGPSEnable){
+                if(isGPSEnable){
                         if(location == null){
                             locationManager.requestLocationUpdates(
                                     locationManager.NETWORK_PROVIDER,
@@ -100,7 +104,7 @@ public class Geo extends Service implements LocationListener {
                                 longitude = location.getLongitude();
                             }
                         }
-                    }
+                }
             }
         }
         catch (Exception e){

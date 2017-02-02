@@ -2,116 +2,95 @@ package com.example.bmorales.test1;
 
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.Settings;
-
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
-
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-
-
 import android.os.Build;
 import android.os.Bundle;
-
 import android.support.v7.widget.Toolbar;
-
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-
+import java.util.List;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
-
-
-
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 
 
 /**
  * Created by bmorales on 11/18/2016.
  */
-/////extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class MainIndex extends AppCompatActivity implements
+        LoaderCallbacks<Cursor>,
+        ActivityCompat.OnRequestPermissionsResultCallback
+{
 
     private ImageView mImageView;
-    private Bitmap mImageBitmap;
-
-    private TextView mTextView;
     private UsuarioDbHelper out;
     private Geo infoGeo;
     private ListView lv;
     private Toolbar toolbar;
-    private Context context;
     private WebserviceActivity serv;
+    private static final int MY_REQUEST_CODE_CAMERA = 1;
+    private static final int MY_REQUEST_CODE_EXTERNAL_STORAGE = 2;
+    private static final int MY_REQUEST_CODE_GPS = 3;
+    private Location tempLoc;
+    private Context context;
+    private ViewPager mViewPager;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    private Button btnGoTo;
-
-    private String mCurrentPhotoPath;
-
-    private static final String JPEG_FILE_PREFIX = "IMG_";
-    private static final String JPEG_FILE_SUFFIX = ".jpg";
-
-    private AlbumStorageDirFactory mAlbumStorageDirFactory = null;
-
-    private int MY_REQUEST_CODE_CAMERA = 121;
-    private int MY_REQUEST_CODE_EXTERNAL_STORAGE = 130;
-    private int MY_REQUEST_CODE_CAMERA_REQUEST = 160;
-    private int MY_REQUEST_CODE_GPS = 140;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainindex);
 
+        /// inicial Context
+        this.context = this.getApplicationContext();
 
         ////  inicializacion nodejs Neurona
         serv = new WebserviceActivity();
 
         out = new UsuarioDbHelper(getBaseContext());
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        mImageView = (ImageView) findViewById(R.id.imageView1);
         setSupportActionBar(toolbar);
         try
         {
-
             String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-
-
             if(!provider.contains("gps")){ //if gps is disabled
                 final Intent poke = new Intent();
                 poke.setClassName("com.android.settings", "com.android.settings.widget.SettingsAppWidgetProvider");
@@ -124,21 +103,13 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
                Log.e("Error !!!", e.getMessage().toString());
         }
 
-
-
         lv = (ListView) findViewById(R.id.LISTA);
 
-        mImageView = (ImageView) findViewById(R.id.imageView1);
-        mImageBitmap = null;
-
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
     }
-
-
-    View.OnClickListener takePictureHandler = new View.OnClickListener(){
-        public void onClick(View v){
-
-        };
-    };
 
 
     public void fillData(ArrayList<String> arrayInfo){
@@ -146,11 +117,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, arrayInfo);
         // Set The Adapter
         lv.setAdapter(arrayAdapter);
-
     }
-
-
-    private AutoCompleteTextView mEmailView;
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -183,9 +150,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
         dialogBox();
     };
 
-    public void getImage(View v){
-        dialogBoxPicture();
-    };
     public void dialogBox() {
 
 
@@ -203,9 +167,7 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
                 }
 
-                ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},1);
-
-
+                ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},3);
             }
         }
 
@@ -236,54 +198,6 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
-    }
-    public void dialogBoxPicture() {
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
-        alertDialogBuilder.setTitle("Imagen");
-
-        alertDialogBuilder.setItems(new CharSequence[]{"Tomar Foto","Seleccionar Foto","Otro"}, new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case 0:
-                        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(cameraIntent, MY_REQUEST_CODE_CAMERA_REQUEST);
-                        break;
-                    case 1:
-                        getImageFile();
-                        break;
-                    case 2:
-                        break;
-
-                }
-            }
-        });
-
-        alertDialogBuilder.setNegativeButton("cancel",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
-
-                    }
-                });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-    }
-
-    private void getImageFile(){
-        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(i,122);
-    };
-    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
-        ParcelFileDescriptor parcelFileDescriptor =
-                getContentResolver().openFileDescriptor(uri, "r");
-
-        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-        parcelFileDescriptor.close();
-        return image;
     }
 
 
@@ -346,81 +260,8 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 160: {
-                if (resultCode == RESULT_OK) {
-                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-
-                    mImageView.setImageBitmap(bitmap);
-                }
-                break;
-            }
-            case 122:
-                if (resultCode == RESULT_OK && null != data) {
-                    Uri selectedImage = data.getData();
-                    String[] filePathColumn = { MediaStore.Images.Media.DATA};
-
-                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
-
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String picturePath = cursor.getString(columnIndex);
-                    cursor.close();
-
-                    Bitmap bmp = null;
-
-                    try{
-                        bmp = getBitmapFromUri(selectedImage);
-
-                        //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
-                        if(Build.VERSION.SDK_INT >= 23){
-                            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ){
-                                Log.d("STORAGE", "Check" );
-
-                                if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.READ_EXTERNAL_STORAGE ) ){
-                                    Log.d("STORAGE", "OK ACCESS_COARSE_LOCATION" );
-                                }
-
-
-                                ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
-
-
-                            }
-
-                                if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
-                                    Log.d("GPS", "00" );
-
-                                    if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_COARSE_LOCATION ) ){
-                                        Log.d("GPS", "OK ACCESS_COARSE_LOCATION" );
-
-                                    }
-                                    else if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_FINE_LOCATION ) ){
-                                        Log.d("GPS", "OK ACCESS_FINE_LOCATION" );
-
-                                    }
-
-                                    ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},1);
-
-
-                                }
-
-
-                        }
-                        infoGeo = new Geo(getBaseContext());
-                        serv.uploadFile(Uri.parse(picturePath), AccessToken.getCurrentAccessToken().getUserId().toString(), infoGeo, getBaseContext());
-                    }catch (IOException e){
-                        e.printStackTrace();
-                    }
-
-                    mImageView.setImageBitmap(bmp);
-
-                }
-                break;
-        }
+        super.onActivityResult(requestCode,resultCode,data);
     }
-
 
 
 
@@ -428,47 +269,67 @@ public class MainIndex extends AppCompatActivity implements LoaderCallbacks<Curs
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch(requestCode){
 
-            case 121:
+            case MY_REQUEST_CODE_CAMERA:
                 Log.v("", "CAMARA Permiso");
                 break;
-            case 130:
+            case MY_REQUEST_CODE_EXTERNAL_STORAGE:
                 Log.v("", "STORAGE Permiso");
                 break;
-            case 140:
+            case MY_REQUEST_CODE_GPS:
                 Log.v("", "GPS Permiso");
+
                 break;
 
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    public boolean CheckStoragePermission() {
-        int permissionCheckRead = ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permissionCheckRead != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
 
-                ActivityCompat.requestPermissions((Activity) context,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_REQUEST_CODE_EXTERNAL_STORAGE);
-            } else {
-                // No explanation needed, we can request the permission.
 
-                ActivityCompat.requestPermissions((Activity) context,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_REQUEST_CODE_EXTERNAL_STORAGE);
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-            return false;
-        } else
-            return true;
+        private List<Fragment> fragments;
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+
+            this.fragments = new ArrayList<Fragment>();
+
+            Bundle args = new Bundle();
+
+            infoGeo = new Geo(getBaseContext());
+
+            args.putDouble("lat",infoGeo.getLatitude());
+            args.putDouble("lng",infoGeo.getLongitude());
+            args.putString("tok",AccessToken.getCurrentAccessToken().getUserId().toString());
+
+
+
+            MapFrag temFrag = new MapFrag();
+            temFrag.setArguments(args);
+
+            FotoFrag temFoto = new FotoFrag();
+            temFoto.setArguments(args);
+
+            MapFrag temFrag2 = new MapFrag();
+            temFrag2.setArguments(args);
+
+            fragments.add(temFrag);
+            fragments.add(temFoto);
+
+
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.size();
+        }
+
     }
+
 
 }

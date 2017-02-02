@@ -1,28 +1,23 @@
 package com.example.bmorales.test1;
 
-import android.Manifest;
-import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.TextView;
 import java.util.Arrays;
+import java.util.logging.Handler;
+
 import android.widget.Toast;
+
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -32,6 +27,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,17 +45,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private CallbackManager callbackManager;
     private WebserviceActivity serv;
     private Toolbar toolbar;
+    private ProgressDialog progressDialog;
+    private Handler mHandler;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         serv = new WebserviceActivity();
 
-
         FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.loginfb);
 
         callbackManager = CallbackManager.Factory.create();
@@ -76,18 +73,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setSupportActionBar(toolbar);
 
         if(nf != null && nf.isConnected()==true ) {
-
-
             if( isLoggedIn() ){
                 goToIndex(null);
             }
-
+            else{
+                new LoadViewTask().execute();
+            }
             Toast.makeText(this, "Network Available", Toast.LENGTH_LONG).show();
             info.setText("Network Available");
 
-
-
             loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
                 @Override
                 public void onSuccess(LoginResult loginResult) {
 
@@ -99,56 +95,112 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 }
                             }).executeAsync();
 
-
+                    new LoadViewTask().execute();
                 }
 
                 @Override
                 public void onCancel() {
                     Toast.makeText(getApplicationContext(), "Fb Login False", Toast.LENGTH_LONG).show();
-
                 }
 
                 @Override
                 public void onError(FacebookException e) {
                     Toast.makeText(getApplicationContext(), "Fb Login Error", Toast.LENGTH_LONG).show();
-
                 }
 
             });
-
-
-
-
         }
         else{
             Toast.makeText(this, "Internet no habilitado", Toast.LENGTH_LONG).show();
             info.setText("Network");
-
         }
     }
+    /////////////////////////////////////////////////
+    // Subclase /////////////////////////////////////
+    // To use the AsyncTask, it must be subclassed
+    /////////////////////////////////////////////////
+    private class LoadViewTask extends AsyncTask<Void, Integer, Void>
+    {
+        //Before running code in separate thread
+        @Override
+        protected void onPreExecute()
+        {
+            //Create a new progress dialog
+            progressDialog = new ProgressDialog(LoginActivity.this);
+            //Set the progress dialog to display a horizontal progress bar
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            //Set the dialog title to 'Loading...'
+            progressDialog.setTitle("Cargando...");
+            //This dialog can't be canceled by pressing the back key
+            progressDialog.setCancelable(false);
+            //This dialog isn't indeterminate
+            progressDialog.setIndeterminate(false);
+            //The maximum number of items is 100
+            progressDialog.setMax(100);
+            //Set the current progress to zero
+            progressDialog.setProgress(0);
+            //Display the progress dialog
+            progressDialog.show();
+        }
 
-    private void action(int resid) {
-        Toast.makeText(this, getText(resid), Toast.LENGTH_SHORT).show();
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            /* This is just a code that delays the thread execution 4 times,
+             * during 850 milliseconds and updates the current progress. This
+             * is where the code that is going to be executed on a background
+             * thread must be placed.
+             */
+            try
+            {
+                synchronized (this)
+                {
+                    int counter = 0;
+                    while(counter <= 4)
+                    {
+                        this.wait(850);
+                        counter++;
+                        publishProgress(counter*25);
+                    }
+                }
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        //Update the progress
+        @Override
+        protected void onProgressUpdate(Integer... values)
+        {
+            //set the current progress of the progress dialog
+            progressDialog.setProgress(values[0]);
+        }
+
+        //after executing the code in the thread
+        @Override
+        protected void onPostExecute(Void result)
+        {
+            //close the progress dialog
+            progressDialog.dismiss();
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-
     }
-
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return null;
     }
-
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
 
     }
-
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
@@ -156,7 +208,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public boolean isLoggedIn() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-
         return accessToken != null;
     }
 
@@ -168,43 +219,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         try {
             if(object == null){
-                object = new JSONObject();
+                    object = new JSONObject();
                     object.put("id",AccessToken.getCurrentAccessToken().getUserId().toString());
                     object.put("name","");
                     serv.login(object, this.getApplicationContext());
-
-
-/*
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                        && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            121);
-
-                    return;
-                }
-
-                final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
-                final String orderBy = MediaStore.Images.Media._ID;
-
-                //Stores all the images from the gallery in Cursor
-                Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null,null, orderBy);
-
-                //Total number of images
-                int count = cursor.getCount();
-
-                //Create an array to store path to all the images
-                String[] arrPath = new String[count];
-
-                for (int i = 0; i < count; i++) {
-                    cursor.moveToPosition(i);
-                    int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-                    //Store the path of the image
-                    arrPath[i]= cursor.getString(dataColumnIndex);
-                    Log.i("PATH", arrPath[i]);
-                }
-
-                    */
-
             }
             else{
                 serv.login(object, this.getApplicationContext());
@@ -215,10 +233,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         Intent in = new Intent (getApplicationContext(),MainIndex.class);
-        startActivityForResult(in, 2);// Act
-        finish();
+        startActivity(in);
+
     }
 
 
 }
+
+
 
