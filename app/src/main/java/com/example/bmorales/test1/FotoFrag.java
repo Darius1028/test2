@@ -39,7 +39,7 @@ import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 
-public class FotoFrag extends Fragment implements View.OnClickListener {
+public class FotoFrag extends Fragment {
 
     private static final int MY_REQUEST_CODE_CAMERA = 1;
     private static final int MY_REQUEST_CODE_EXTERNAL_STORAGE = 2;
@@ -63,12 +63,6 @@ public class FotoFrag extends Fragment implements View.OnClickListener {
         mImageView = (ImageView) view.findViewById(R.id.imageView1);
         ////  inicializacion nodejs Neurona
         serv = new WebserviceActivity();
-
-        try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         Button button = (Button) view.findViewById(R.id.PICTURE);
         button.setOnClickListener(new View.OnClickListener()
@@ -194,8 +188,4 @@ public class FotoFrag extends Fragment implements View.OnClickListener {
     }
 
 
-    @Override
-    public void onClick(View v) {
-        getImageFile();
-    }
 }

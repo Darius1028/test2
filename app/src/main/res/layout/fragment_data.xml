@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content">
+
+        <Button
+            android:text="ELIMINAR DATA"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/DROP"
+            android:backgroundTint="@color/colorPrimaryCustom"
+            android:onClick="buttonPressDrop"
+            android:background="@android:drawable/alert_light_frame"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:layout_height="60dp" />
+
+        <Button
+            android:text="ENLISTAR DATOS"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_height="60dp"
+            android:id="@+id/GET"
+            android:backgroundTint="@color/colorPrimaryCustom"
+            android:onClick="getRandom"
+            android:background="@android:drawable/alert_light_frame"
+            android:textAppearance="@style/TextAppearance.AppCompat" />
+
+        <Button
+            android:text="LOCALIZACIÓN"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_height="60dp"
+            android:id="@+id/GEO"
+            android:backgroundTint="@color/colorPrimaryCustom"
+            android:background="@android:drawable/alert_light_frame"
+            android:onClick="getGeo"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            style="@style/Widget.AppCompat.Button.Small" />
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="60dp">
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:id="@+id/LISTA"
+            android:layout_height="400dp" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,44 +1,24 @@
 package com.example.bmorales.test1;
 
 
-import android.Manifest;
-import android.app.Activity;
+
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.location.LocationListener;
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-
-
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import android.util.Log;
 import android.widget.Toast;
@@ -56,8 +36,6 @@ public class MainIndex extends AppCompatActivity implements
         LoaderCallbacks<Cursor>,
         ActivityCompat.OnRequestPermissionsResultCallback
 {
-
-    private ImageView mImageView;
     private UsuarioDbHelper out;
     private Geo infoGeo;
     private ListView lv;
@@ -66,7 +44,6 @@ public class MainIndex extends AppCompatActivity implements
     private static final int MY_REQUEST_CODE_CAMERA = 1;
     private static final int MY_REQUEST_CODE_EXTERNAL_STORAGE = 2;
     private static final int MY_REQUEST_CODE_GPS = 3;
-    private Location tempLoc;
     private Context context;
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -84,9 +61,9 @@ public class MainIndex extends AppCompatActivity implements
         ////  inicializacion nodejs Neurona
         serv = new WebserviceActivity();
 
-        out = new UsuarioDbHelper(getBaseContext());
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        mImageView = (ImageView) findViewById(R.id.imageView1);
+
         setSupportActionBar(toolbar);
         try
         {
@@ -112,13 +89,6 @@ public class MainIndex extends AppCompatActivity implements
     }
 
 
-    public void fillData(ArrayList<String> arrayInfo){
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, arrayInfo);
-        // Set The Adapter
-        lv.setAdapter(arrayAdapter);
-    }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return null;
@@ -133,75 +103,6 @@ public class MainIndex extends AppCompatActivity implements
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
-
-    public void buttonBulk(View v){
-        //out.bulkData();
-    }
-
-    public void buttonPressDrop(View v){
-        out.dropALL();
-    }
-
-    public void getRandom(View v){
-        fillData(out.getLista());
-    }
-
-    public void getGeo(View v){
-        dialogBox();
-    };
-
-    public void dialogBox() {
-
-
-        if(Build.VERSION.SDK_INT >= 23){
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
-                Log.d("GPS", "00" );
-
-                if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_COARSE_LOCATION ) ){
-                    Log.d("GPS", "OK ACCESS_COARSE_LOCATION" );
-
-                }
-                else if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,Manifest.permission.ACCESS_FINE_LOCATION ) ){
-                    Log.d("GPS", "OK ACCESS_FINE_LOCATION" );
-
-                }
-
-                ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},3);
-            }
-        }
-
-
-        infoGeo = new Geo(getBaseContext());
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage(" Lat: " + infoGeo.getLatitude() + " Log: " + infoGeo.getLongitude());
-        alertDialogBuilder.setPositiveButton("Ok",
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
-
-                        Calendar now = Calendar.getInstance();
-                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), "OK" );
-
-                    }
-                });
-
-        alertDialogBuilder.setNegativeButton("cancel",
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
-
-                    }
-                });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-    }
-
-
-
 
 
     /////////////////////////////////////////////////////
@@ -310,12 +211,12 @@ public class MainIndex extends AppCompatActivity implements
             FotoFrag temFoto = new FotoFrag();
             temFoto.setArguments(args);
 
-            MapFrag temFrag2 = new MapFrag();
-            temFrag2.setArguments(args);
+            DataFrag temData = new DataFrag();
+            temData.setArguments(args);
 
             fragments.add(temFrag);
             fragments.add(temFoto);
-
+            fragments.add(temData);
 
         }
 

@@ -16,51 +16,7 @@
         android:elevation="@dimen/elevation"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         tools:ignore="UnusedAttribute"/>
-    <LinearLayout
-    android:orientation="horizontal"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent">
-
-    <Button
-        android:text="ELIMINAR DATA"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:id="@+id/DROP"
-        android:backgroundTint="@color/colorPrimaryCustom"
-        android:onClick="buttonPressDrop"
-        android:background="@android:drawable/alert_light_frame"
-        android:textAppearance="@style/TextAppearance.AppCompat" />
-
-    <Button
-        android:text="ENLISTAR DATOS"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:id="@+id/GET"
-        android:backgroundTint="@color/colorPrimaryCustom"
-        android:onClick="getRandom"
-        android:background="@android:drawable/alert_light_frame"
-        android:textAppearance="@style/TextAppearance.AppCompat" />
-
-    <Button
-        android:text="LOCALIZACIÓN"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:id="@+id/GEO"
-        android:backgroundTint="@color/colorPrimaryCustom"
-        android:background="@android:drawable/alert_light_frame"
-        android:onClick="getGeo"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        style="@style/Widget.AppCompat.Button.Small" />
-     </LinearLayout>
-    <ListView
-        android:layout_width="wrap_content"
-        android:gravity="center"
-        android:id="@+id/LISTA"
-        android:layout_height="80dp" />
-    <android.support.v4.view.ViewPager
+<android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
