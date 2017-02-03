@@ -62,7 +62,7 @@ public class DataFrag extends Fragment  {
             @Override
             public void onClick(View v)
             {
-                getGeo();
+                fillData(out.getLista());
             }
         });
 
@@ -84,13 +84,11 @@ public class DataFrag extends Fragment  {
         out.dropALL();
     }
 
-    public void getRandom(){
-        fillData(out.getLista());
-    }
+
 
     public void fillData(ArrayList<String> arrayInfo){
 
-       ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, arrayInfo);
+       ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1, arrayInfo);
         // Set The Adapter
         lv.setAdapter(arrayAdapter);
     }
@@ -132,7 +130,7 @@ public class DataFrag extends Fragment  {
 
                         Calendar now = Calendar.getInstance();
                         Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), "OK" );
-
+                        out.saveUsuario(user);
                     }
                 });
 
