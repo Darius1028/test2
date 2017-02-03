@@ -36,6 +36,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.Calendar;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -48,34 +49,40 @@ public class FotoFrag extends Fragment {
     private Geo infoGeo;
     private String Tok;
     private ImageView mImageView;
+    private View _rootView;
+    private UsuarioDbHelper out;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_foto, container, false);
+        if (_rootView == null) {
+            _rootView = inflater.inflate(R.layout.fragment_foto, container, false);
 
-        Bundle b = getArguments();
+            Bundle b = getArguments();
 
-        final double lat = b.getDouble("lat");
-        final double lng = b.getDouble("lng");
+            final double lat = b.getDouble("lat");
+            final double lng = b.getDouble("lng");
 
-        Tok = b.getString("tok");
+            Tok = b.getString("tok");
 
-        mImageView = (ImageView) view.findViewById(R.id.imageView1);
-        ////  inicializacion nodejs Neurona
-        serv = new WebserviceActivity();
+            out = new UsuarioDbHelper(getContext());
 
-        Button button = (Button) view.findViewById(R.id.PICTURE);
-        button.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
+            mImageView = (ImageView) _rootView.findViewById(R.id.imageView1);
+            ////  inicializacion nodejs Neurona
+            serv = new WebserviceActivity();
+
+            Button button = (Button) _rootView.findViewById(R.id.PICTURE);
+            button.setOnClickListener(new View.OnClickListener()
             {
-                dialogBoxPicture();
-            }
-        });
+                @Override
+                public void onClick(View v)
+                {
+                    dialogBoxPicture();
+                }
+            });
+        }
 
 
-        return view;
+        return _rootView;
     }
 
     public void getImage(View v){
@@ -159,7 +166,7 @@ public class FotoFrag extends Fragment {
                     try{
                         bmp = getBitmapFromUri(selectedImage);
 
-                        //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20170104_112852363_HDR.jpg");
+                        //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG.jpg");
                         if(Build.VERSION.SDK_INT >= 23){
                             if(ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                                     ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
@@ -176,8 +183,14 @@ public class FotoFrag extends Fragment {
 
                         infoGeo = new Geo(getContext());
                         serv.uploadFile(Uri.parse(picturePath), Tok, infoGeo, getContext());
+                        Calendar now = Calendar.getInstance();
+                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), selectedImage.getPath() );
+                        out.saveUsuario(user);
                         mImageView.setImageBitmap(bmp);
 
+                        String fr = selectedImage.getPath();
+                        String frwe = selectedImage.toString();
+                        String frwedd = selectedImage.toString();
 
                     }catch (IOException e){
                         e.printStackTrace();

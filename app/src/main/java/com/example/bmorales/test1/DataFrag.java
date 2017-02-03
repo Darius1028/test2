@@ -31,52 +31,52 @@ public class DataFrag extends Fragment  {
     private Geo infoGeo;
     private ListView lv;
     private UsuarioDbHelper out;
+    private View _rootView;
 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View viewData = inflater.inflate(R.layout.fragment_data, container, false);
 
-        Bundle b = getArguments();
+        if (_rootView == null) {
+            _rootView = inflater.inflate(R.layout.fragment_data, container, false);
 
+            Bundle b = getArguments();
 
+            out = new UsuarioDbHelper(getContext());
+            lv = (ListView)  _rootView.findViewById(R.id.LISTA);
+            ////  inicializacion nodejs Neurona
 
-        out = new UsuarioDbHelper(getContext());
-        lv = (ListView)  viewData.findViewById(R.id.LISTA);
-        ////  inicializacion nodejs Neurona
-
-
-        Button Drop = (Button) viewData.findViewById(R.id.DROP);
-        Drop.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
+            Button Drop = (Button) _rootView.findViewById(R.id.DROP);
+            Drop.setOnClickListener(new View.OnClickListener()
             {
-                buttonPressDrop();
-            }
-        });
+                @Override
+                public void onClick(View v)
+                {
+                    buttonPressDrop();
+                }
+            });
 
-        Button Get = (Button) viewData.findViewById(R.id.GET);
-        Get.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
+            Button Get = (Button) _rootView.findViewById(R.id.GET);
+            Get.setOnClickListener(new View.OnClickListener()
             {
-                fillData(out.getLista());
-            }
-        });
+                @Override
+                public void onClick(View v)
+                {
+                    fillData(out.getListaString());
+                }
+            });
 
-        Button Geo = (Button) viewData.findViewById(R.id.GEO);
-        Geo.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
+            Button Geo = (Button) _rootView.findViewById(R.id.GEO);
+            Geo.setOnClickListener(new View.OnClickListener()
             {
-                dialogBox();
-            }
-        });
-
-        return viewData;
+                @Override
+                public void onClick(View v)
+                {
+                    dialogBox();
+                }
+            });
+        }
+        return _rootView;
     }
 
 
@@ -93,9 +93,6 @@ public class DataFrag extends Fragment  {
         lv.setAdapter(arrayAdapter);
     }
 
-    public void getGeo(){
-        fillData(out.getLista());
-    };
 
     public void dialogBox() {
 
@@ -130,6 +127,7 @@ public class DataFrag extends Fragment  {
 
                         Calendar now = Calendar.getInstance();
                         Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), "OK" );
+
                         out.saveUsuario(user);
                     }
                 });

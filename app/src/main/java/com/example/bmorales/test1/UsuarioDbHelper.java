@@ -38,9 +38,11 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         db.execSQL(" CREATE TABLE "  + UsuarioEntry.TABLE_NAME + " ("
                 + UsuarioEntry.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + UsuarioEntry.NAME + " TEXT NOT NULL,"
+                + UsuarioEntry.EMAIL + " TEXT NOT NULL,"
                 + UsuarioEntry.LAT + " TEXT NOT NULL,"
                 + UsuarioEntry.LON + " TEXT NOT NULL,"
-                + UsuarioEntry.TIME + " TEXT NOT NULL )"
+                + UsuarioEntry.TIME + " TEXT NOT NULL,"
+                + UsuarioEntry.MESSAGE + " TEXT NOT NULL )"
         );
     }
 
@@ -54,10 +56,11 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
 
         values.put(UsuarioEntry.NAME, user.getName());
+        values.put(UsuarioEntry.EMAIL, user.getEmail());
         values.put(UsuarioEntry.LAT, user.getLat());
         values.put(UsuarioEntry.LON, user.getLon());
         values.put(UsuarioEntry.TIME, user.getTime());
-
+        values.put(UsuarioEntry.MESSAGE, user.getMessage());
         return values;
     }
 
@@ -84,14 +87,14 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         Time now = new Time();
         now.setToNow();
 
-        saveUsuario(new Usuario(null , "Carlos Perez", "", "1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Daniel Samper", "","1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Lucia Aristizabal", "","1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Marina Acosta", "","1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Olga Ortiz","", "1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Pamela Briger", "","1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Rodrigo Benavidez", "","1111", "1111", now.toString(), "OK"));
-        saveUsuario( new Usuario(null, "Tom Bonz", "","1111", "1111", now.toString(), "OK"));
+        saveUsuario(new Usuario(null , "Carlos Perez", "saf@.dasf.com", "1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Daniel Samper", "saf@.dasf.com","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Lucia Aristizabal", "saf@.dasf.com","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Marina Acosta", "saf@.dasf.com","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Olga Ortiz","saf@.dasf.com", "1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Pamela Briger", "saf@.dasf.com","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Rodrigo Benavidez", "saf@.dasf.com","1111", "1111", now.toString(), "OK"));
+        saveUsuario( new Usuario(null, "Tom Bonz", "saf@.dasf.com","1111", "1111", now.toString(), "OK"));
     }
 
     public String getNameRandom(){
@@ -102,6 +105,7 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         Cursor c = db.query(
                 UsuarioEntry.TABLE_NAME,
                 columns,
+                null,
                 null,
                 null,
                 null,
@@ -127,10 +131,10 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
     }
 
 
-    public ArrayList<String> getLista(){
+    public ArrayList<String> getListaString(){
         SQLiteDatabase db = getWritableDatabase();
 
-        String columns[] = new String[]{UsuarioEntry.ID, UsuarioEntry.NAME, UsuarioEntry.LAT, UsuarioEntry.LON, UsuarioEntry.TIME};
+        String columns[] = new String[]{UsuarioEntry.ID, UsuarioEntry.NAME, UsuarioEntry.EMAIL, UsuarioEntry.LAT, UsuarioEntry.LON, UsuarioEntry.TIME, UsuarioEntry.MESSAGE};
 
         Cursor c = db.query(
                 UsuarioEntry.TABLE_NAME,
@@ -146,7 +150,7 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         int tempInt = c.getCount();
 
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-            listItems.add(c.getString(1) +" Lat:"+c.getString(2)+" Lon:"+c.getString(3) + " Time:" + c.getString(4));
+            listItems.add(c.getString(1) +" :"+c.getString(2)+" :"+c.getString(3) + " :" + c.getString(4)  + " :" + c.getString(5)  + " :" + c.getString(6) );
         }
 
 
@@ -159,5 +163,24 @@ public class UsuarioDbHelper extends SQLiteOpenHelper{
         return listItems;
     }
 
+
+    public Cursor getList(){
+        SQLiteDatabase db = getWritableDatabase();
+
+        String columns[] = new String[]{UsuarioEntry.ID, UsuarioEntry.NAME, UsuarioEntry.EMAIL, UsuarioEntry.LAT, UsuarioEntry.LON, UsuarioEntry.TIME, UsuarioEntry.MESSAGE};
+
+        Cursor c = db.query(
+                UsuarioEntry.TABLE_NAME,
+                columns,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+
+        return c;
+    }
 
 }

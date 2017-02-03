@@ -47,7 +47,9 @@ public class MainIndex extends AppCompatActivity implements
     private Context context;
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
-
+    private MapFrag temFrag;
+    private FotoFrag temFoto;
+    private DataFrag temData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -205,13 +207,13 @@ public class MainIndex extends AppCompatActivity implements
 
 
 
-            MapFrag temFrag = new MapFrag();
+            temFrag = new MapFrag();
             temFrag.setArguments(args);
 
-            FotoFrag temFoto = new FotoFrag();
+            temFoto = new FotoFrag();
             temFoto.setArguments(args);
 
-            DataFrag temData = new DataFrag();
+            temData = new DataFrag();
             temData.setArguments(args);
 
             fragments.add(temFrag);
