@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -161,10 +163,12 @@ public class FotoFrag extends Fragment {
                     String picturePath = cursor.getString(columnIndex);
                     cursor.close();
 
+
                     Bitmap bmp = null;
 
                     try{
                         bmp = getBitmapFromUri(selectedImage);
+                        Drawable d = new BitmapDrawable(getResources(), bmp);
 
                         //Uri imageUri = Uri.parse("/storage/emulated/0/DCIM/Camera/IMG.jpg");
                         if(Build.VERSION.SDK_INT >= 23){
@@ -184,13 +188,10 @@ public class FotoFrag extends Fragment {
                         infoGeo = new Geo(getContext());
                         serv.uploadFile(Uri.parse(picturePath), Tok, infoGeo, getContext());
                         Calendar now = Calendar.getInstance();
-                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), selectedImage.getPath() );
+                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), picturePath );
                         out.saveUsuario(user);
                         mImageView.setImageBitmap(bmp);
 
-                        String fr = selectedImage.getPath();
-                        String frwe = selectedImage.toString();
-                        String frwedd = selectedImage.toString();
 
                     }catch (IOException e){
                         e.printStackTrace();
