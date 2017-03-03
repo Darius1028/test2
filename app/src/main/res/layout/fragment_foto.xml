@@ -14,28 +14,74 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <Button
-                android:text="FOTO"
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:id="@+id/PICTURE"
-                android:layout_gravity="center_vertical|center_horizontal"
-                android:onClick="buttonBulk (MainIndex)"
-                android:textAppearance="@style/TextAppearance.AppCompat.Button" />
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/TITULO"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Título"
+                    android:inputType="text"
+                    android:text="@string/empty_text"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/DESCRIPCION"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Descripción"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:text="@string/empty_text"
+                    android:singleLine="true" />
+
+            </android.support.design.widget.TextInputLayout>
+
 
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="30dp"
                 android:id="@+id/imageView1"
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"/>
+
+            <Button
+                android:id="@+id/PICTURE"
+                style="?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="FOTO"
+                android:textStyle="bold" />
+            <Button
+                android:id="@+id/GUARDAR"
+                style="?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="GUARDAR"
+                android:textStyle="bold" />
+
+
+
+
 
 
 
 
         </LinearLayout>
     </ScrollView>
+
+
 
 </RelativeLayout>

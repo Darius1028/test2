@@ -3,6 +3,7 @@ package com.example.bmorales.test1;
 import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,8 @@ import android.widget.ListView;
 
 import com.google.gson.internal.bind.ArrayTypeAdapter;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -30,7 +33,7 @@ public class DataFrag extends Fragment  {
     private static final int MY_REQUEST_CODE_GPS = 3;
     private Geo infoGeo;
     private ListView lv;
-    private UsuarioDbHelper out;
+    private ItemDbHelper out;
     private View _rootView;
 
 
@@ -42,7 +45,7 @@ public class DataFrag extends Fragment  {
 
             Bundle b = getArguments();
 
-            out = new UsuarioDbHelper(getContext());
+            out = new ItemDbHelper(getContext());
             lv = (ListView)  _rootView.findViewById(R.id.LISTA);
             ////  inicializacion nodejs Neurona
 
@@ -75,6 +78,11 @@ public class DataFrag extends Fragment  {
                     dialogBox();
                 }
             });
+            //final double lat =  getActivity().getIntent().getExtras().getDouble("lat");
+            //final double lng =  getActivity().getIntent().getExtras().getDouble("lng");
+
+            //Intent intent = getActivity().getIntent();
+            //String sass = "";
         }
         return _rootView;
     }
@@ -97,25 +105,6 @@ public class DataFrag extends Fragment  {
     public void dialogBox() {
 
 
-        if(Build.VERSION.SDK_INT >= 23){
-            if(ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
-                Log.d("GPS", "00" );
-
-                if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) getContext(),Manifest.permission.ACCESS_COARSE_LOCATION ) ){
-                    Log.d("GPS", "OK ACCESS_COARSE_LOCATION" );
-
-                }
-                else if( ActivityCompat.shouldShowRequestPermissionRationale((Activity) getContext(),Manifest.permission.ACCESS_FINE_LOCATION ) ){
-                    Log.d("GPS", "OK ACCESS_FINE_LOCATION" );
-
-                }
-
-                ActivityCompat.requestPermissions((Activity) getContext(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},3);
-            }
-        }
-
-
         infoGeo = new Geo(getContext());
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         alertDialogBuilder.setMessage(" Lat: " + infoGeo.getLatitude() + " Log: " + infoGeo.getLongitude());
@@ -125,10 +114,11 @@ public class DataFrag extends Fragment  {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
 
-                        Calendar now = Calendar.getInstance();
-                        Usuario user = new Usuario(null, "Dario", "", ""+infoGeo.getLatitude()+"", ""+infoGeo.getLongitude()+"", now.getTime().toString(), "OK" );
+                        DateFormat df = new SimpleDateFormat("dd MM yyyy, HH:mm");
+                        String date = df.format(Calendar.getInstance().getTime());
+                        Item item = new Item( "ddds 34234543 355445", "info ",  "Desk ", "" + infoGeo.getLatitude() , "" + infoGeo.getLongitude(), date , "LoremIpsum" );
+                        out.saveItem(item);
 
-                        out.saveUsuario(user);
                     }
                 });
 

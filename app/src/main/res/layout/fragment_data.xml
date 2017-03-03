@@ -58,6 +58,8 @@
             android:gravity="center"
             android:id="@+id/LISTA"
             android:layout_height="400dp" />
+
+
     </LinearLayout>
 
 </RelativeLayout>

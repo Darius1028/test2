@@ -1,4 +1,6 @@
 package com.example.bmorales.test1;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +47,9 @@ public class MapFrag extends Fragment {
     Location tempLoc;
     private GoogleMap googleMap;
     private View _rootView;
-    private UsuarioDbHelper out;
+    private ItemDbHelper out;
+    private MarkerOptions mMarkerOptions;
+    Marker myMarker;
 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,7 +60,7 @@ public class MapFrag extends Fragment {
             final double lng = b.getDouble("lng");
             mMapView = (MapView) _rootView.findViewById(R.id.mapView);
             mMapView.onCreate(savedInstanceState);
-            out = new UsuarioDbHelper(getContext());
+            out = new ItemDbHelper(getContext());
             mMapView.onResume(); // needed to get the map to display immediately
             try {
                 MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -71,17 +76,23 @@ public class MapFrag extends Fragment {
                     googleMap.setMyLocationEnabled(true);
                     // For dropping a marker at a point on the Map
                     LatLng current  = new LatLng(lat, lng);
-                    googleMap.addMarker(new MarkerOptions().position(current).title("Tu estás aquí").snippet("").draggable(true));
+                    mMarkerOptions = new MarkerOptions().position(current).title(""+lat+", "+lng ).draggable(true).icon(BitmapDescriptorFactory.fromResource(R.drawable.spin)).alpha(0.5f);
+
+                    myMarker = googleMap.addMarker(mMarkerOptions);
                     Cursor tempUserData = out.getList();
                     for (tempUserData.moveToFirst(); !tempUserData.isAfterLast(); tempUserData.moveToNext()) {
                         //listItems.add(tempUserData.getString(1) +" Lat:"+tempUserData.getString(2)+" Lon:"+tempUserData.getString(3) + " Time:" + tempUserData.getString(4));
                         Double doubleLat = Double.parseDouble(tempUserData.getString(3));
                         Double doubleLng = Double.parseDouble(tempUserData.getString(4));
                         LatLng tempInfo = new LatLng(doubleLat, doubleLng);
-                        MarkerOptions tempMarker = new MarkerOptions().position(tempInfo).title("SPIN").snippet("").alpha(0.7f);
+                        MarkerOptions tempMarker = new MarkerOptions().position(tempInfo).title("SPIN").snippet("").alpha(0.5f);
                         String imagePath = tempUserData.getString(6);
 
                         File imgFile = new  File(imagePath);
+                        if(!imgFile.exists()){
+                            String temp = getRealPathFromURI(getContext(), Uri.parse(imagePath) );
+                            imgFile = new File(temp);
+                        }
 
                         if(imgFile.exists()){
                         Bitmap compressedImage = new Compressor.Builder(getContext())
@@ -103,8 +114,67 @@ public class MapFrag extends Fragment {
                     // For zooming automatically to the location of the marker
                     CameraPosition cameraPosition = new CameraPosition.Builder().target(current).zoom(15).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                    googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+
+                        @Override
+                        public void onMarkerDragStart(Marker marker) {
+                        }
+
+                        @Override
+                        public void onMarkerDragEnd(Marker marker) {
+                            if(myMarker != null){
+                                myMarker.setTitle("" + googleMap.getMyLocation().getLatitude() + ", "  + googleMap.getMyLocation().getLongitude());
+
+                                getActivity().getIntent().removeExtra("lat");
+                                getActivity().getIntent().removeExtra("lng");
+
+                                getActivity().getIntent().putExtra("lat", googleMap.getMyLocation().getLatitude());
+                                getActivity().getIntent().putExtra("lng", googleMap.getMyLocation().getLongitude());
+
+                            }
+                        }
+
+                        @Override
+                        public void onMarkerDrag(Marker marker) {
+                        }
+
+                    });
+
+                    googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                        @Override
+                        public void onMapClick(LatLng latLng) {
+                            if(myMarker != null){
+                                myMarker.setTitle("" + latLng.latitude + ", "  + latLng.longitude);
+                                myMarker.setPosition(latLng);
+
+
+
+                                Intent intent = getActivity().getIntent();
+                                String lat1 =  intent.getExtras().getString("lat");
+
+                                intent.removeExtra("lat");
+                                intent.removeExtra("lng");
+
+
+
+                                intent.putExtra("lat", "" + latLng.latitude);
+                                intent.putExtra("lng",  "" + latLng.longitude);
+
+                                String lat14 =  intent.getExtras().getString("lat");
+                                String lat15 =  intent.getExtras().getString("lat");
+
+
+                            }
+                        }
+                    });
+
                 }
+
             });
+
+
+
         }
         else{
 
@@ -141,6 +211,8 @@ public class MapFrag extends Fragment {
     }
 
 
+
+
     private Bitmap getBitmapFromUri(Uri uri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =
                 getContext().getContentResolver().openFileDescriptor(uri, "r");
@@ -149,6 +221,21 @@ public class MapFrag extends Fragment {
         Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
         parcelFileDescriptor.close();
         return image;
+    }
+
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
 

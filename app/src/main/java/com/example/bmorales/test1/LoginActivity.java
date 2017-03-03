@@ -233,6 +233,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         Intent in = new Intent (getApplicationContext(),MainIndex.class);
+        in.putExtra("lat", "0.0f");
+        in.putExtra("lng", "0.0f");
         startActivity(in);
 
     }

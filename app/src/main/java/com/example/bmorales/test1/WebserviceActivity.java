@@ -2,13 +2,17 @@ package com.example.bmorales.test1;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import id.zelory.compressor.Compressor;
 import okhttp3.MediaType;
@@ -18,6 +22,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.Call;
+
 
 import retrofit2.Callback;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -29,7 +34,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 //identify
 public class WebserviceActivity {
 
-    private String urlServ = "https://neurona-turk128.c9.io/api/";
+    private String urlServ = "http://52.37.153.187/api/";
+    private ItemDbHelper out;
+    Item item;
     boolean success = false;
     Usuario user = null;
 
@@ -73,7 +80,7 @@ public class WebserviceActivity {
     }
 
 
-    public void uploadFile(Uri fileUri, String userId, Geo loc, Context context) {
+    public void uploadFile(Uri fileUri, String userId, String lat, String lng, Context context) {
         // create upload service client
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -83,11 +90,15 @@ public class WebserviceActivity {
 
         IApiMethods api = retrofit.create(IApiMethods.class);
 
-        // https://github.com/iPaulPro/aFileChooser/blob/master/aFileChooser/src/com/ipaulpro/afilechooser/utils/FileUtils.java
-        // use the FileUtils to get the actual file by uri
 
-        File file = FileUtils.getFile(fileUri.getPath());
-        File compressedImageFile = Compressor.getDefault(context).compressToFile(file);
+        String temp = getRealPathFromURI(context,fileUri);
+        File file = new File(temp);
+        out = new ItemDbHelper(context);
+
+
+
+        if(file.exists()){
+            File compressedImageFile = Compressor.getDefault(context).compressToFile(file);
 
 
 
@@ -116,13 +127,13 @@ public class WebserviceActivity {
         // add another part within the multipart request
         ///////////////////////////////////////////////
 
-        Calendar now = Calendar.getInstance();
-        Usuario iu =  new Usuario(userId, "", "", String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), now.getTime().toString(), "Envio imagen");
 
-        RequestBody user =
-                RequestBody.create(
-                        MediaType.parse("multipart/form-data"),  iu.toJSON());
+        DateFormat df = new SimpleDateFormat("dd MM yyyy, HH:mm");
+        String date = df.format(Calendar.getInstance().getTime());
+        item = new Item( userId, "Image",  "Upload", lat, lng, date, temp );
 
+
+        RequestBody user =  RequestBody.create(MediaType.parse("multipart/form-data"),  item.toJSON());
 
         // finally, execute the request
         Call<ResponseBody> call = api.uploadFile(description, user, body);
@@ -133,12 +144,12 @@ public class WebserviceActivity {
                 ResponseBody temp = response.body();
                 try {
                     JSONObject jsonObj = new JSONObject(temp.string());
-                    Log.v("Upload", "success " + jsonObj.getInt("msg"));
+                      Log.v("Upload", "success " + jsonObj.get("msg"));
+                    out.saveItem(item);
                 }
                 catch (Throwable t){
                     Log.v("Upload error", "error Json error " + t.toString() );
                 }
-
             }
 
             @Override
@@ -146,7 +157,24 @@ public class WebserviceActivity {
                 Log.e("Upload error:", t.getMessage());
             }
         });
+        }
     }
+
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
 }
 
 
