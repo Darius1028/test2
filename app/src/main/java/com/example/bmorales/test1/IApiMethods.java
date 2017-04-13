@@ -29,7 +29,7 @@ public interface IApiMethods {
 
 
     //Direccion del request en mi caso la ip de mi computador personal
-    String URL = "https://neurona-turk128.c9.io/api/";
+    String URL = "http://ec2-34-208-163-216.us-west-2.compute.amazonaws.com/api/";
 
     @Headers({
             "Accept: application/json",
@@ -47,9 +47,7 @@ public interface IApiMethods {
     @POST("file_upload")
     Call<ResponseBody> uploadFile(
             @Part("description") RequestBody description,
-            @Part("user") RequestBody user,
+            @Part("item") RequestBody item,
             @Part MultipartBody.Part file);
-
-
 
 }

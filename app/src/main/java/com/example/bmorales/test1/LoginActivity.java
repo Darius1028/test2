@@ -3,6 +3,9 @@ package com.example.bmorales.test1;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -12,7 +15,12 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
+import android.util.Log;
 import android.widget.TextView;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Handler;
 
@@ -51,11 +59,31 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        try {
+
+            PackageInfo info = getBaseContext().getPackageManager().getPackageInfo("com.superreceptionist",
+                    PackageManager.GET_SIGNATURES);
+            for (android.content.pm.Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+
+                String sign=Base64.encodeToString(md.digest(), Base64.DEFAULT);
+                Log.e("KeyHash:", sign);
+                //  Toast.makeText(getApplicationContext(),sign,     Toast.LENGTH_LONG).show();
+            }
+            Log.d("KeyHash:", "****------------***");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
         super.onCreate(savedInstanceState);
 
         serv = new WebserviceActivity();
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        FacebookSdk.sdkInitialize(this.getApplicationContext());
 
         setContentView(R.layout.loginfb);
 

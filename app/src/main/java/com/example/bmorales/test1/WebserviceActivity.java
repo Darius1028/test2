@@ -34,9 +34,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 //identify
 public class WebserviceActivity {
 
-    private String urlServ = "http://52.37.153.187/api/";
+    private String urlServ = "http://52.33.91.244/api/";
     private ItemDbHelper out;
-    Item item;
+    Item _item;
     boolean success = false;
     Usuario user = null;
 
@@ -80,7 +80,7 @@ public class WebserviceActivity {
     }
 
 
-    public void uploadFile(Uri fileUri, String userId, String lat, String lng, Context context) {
+    public void uploadFile(Uri fileUri, String userId, String titulo, String descripcion, String lat, String lng, Context context) {
         // create upload service client
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -130,13 +130,13 @@ public class WebserviceActivity {
 
         DateFormat df = new SimpleDateFormat("dd MM yyyy, HH:mm");
         String date = df.format(Calendar.getInstance().getTime());
-        item = new Item( userId, "Image",  "Upload", lat, lng, date, temp );
+        _item = new Item( userId, titulo,  descripcion, lat, lng, date, temp );
 
 
-        RequestBody user =  RequestBody.create(MediaType.parse("multipart/form-data"),  item.toJSON());
+        RequestBody item =  RequestBody.create(MediaType.parse("multipart/form-data"),  _item.toJSON());
 
         // finally, execute the request
-        Call<ResponseBody> call = api.uploadFile(description, user, body);
+        Call<ResponseBody> call = api.uploadFile(description, item, body);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call,
@@ -145,7 +145,7 @@ public class WebserviceActivity {
                 try {
                     JSONObject jsonObj = new JSONObject(temp.string());
                       Log.v("Upload", "success " + jsonObj.get("msg"));
-                    out.saveItem(item);
+                    out.saveItem(_item);
                 }
                 catch (Throwable t){
                     Log.v("Upload error", "error Json error " + t.toString() );

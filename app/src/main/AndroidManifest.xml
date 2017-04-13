@@ -38,7 +38,6 @@
             android:value="@string/facebook_app_id"/>
         <activity android:name="com.facebook.FacebookActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity
             android:name=".MainIndex"
             android:label="@string/app_name">
@@ -46,8 +45,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-
         <receiver android:name=".Radar" >
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" >

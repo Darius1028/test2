@@ -89,10 +89,10 @@ public class MapFrag extends Fragment {
                         String imagePath = tempUserData.getString(6);
 
                         File imgFile = new  File(imagePath);
-                        if(!imgFile.exists()){
-                            String temp = getRealPathFromURI(getContext(), Uri.parse(imagePath) );
-                            imgFile = new File(temp);
-                        }
+                       // if(!imgFile.exists()){
+                           // String temp = getRealPathFromURI(getContext(), Uri.parse(imagePath) );
+                            //imgFile = new File(temp);
+                       // }
 
                         if(imgFile.exists()){
                         Bitmap compressedImage = new Compressor.Builder(getContext())

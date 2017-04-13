@@ -244,7 +244,7 @@ public class FotoFrag extends Fragment  {
 
         String lng = intent.getExtras().getString("lng");
 
-        serv.uploadFile(Path, Tok, lat, lng, getContext());
+        serv.uploadFile(Path, Tok, titulo, descripcion, lat, lng, getContext());
 
         return false;
     }
